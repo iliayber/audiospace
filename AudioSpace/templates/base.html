@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioSpace - Музыкальный плеер</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- ЭКРАН ЗАГРУЗКИ С 3D-КУБОМ -->
+    <div id="preloader">
+        <canvas id="cubeCanvas"></canvas>
+        <div class="loading-text">AUDIOSPACE LOADING...</div>
+    </div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">🎵 AudioSpace</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/library">Библиотека</a>
+                {% if current_user.is_authenticated %}
+                    <a href="/upload">Загрузить</a>
+                    <a href="/profile/{{ current_user.username }}">Профиль</a>
+                    <a href="/logout">Выйти</a>
+                {% else %}
+                    <a href="/login">Вход</a>
+                    <a href="/register">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+        <!-- ГЛОБАЛЬНЫЙ ПЛЕЕР С ВОЛНАМИ -->
+    <div id="global-player" class="global-player">
+        <div class="player-info">
+            <span id="now-playing-title">Выберите трек</span>
+            <span id="now-playing-artist"></span>
+        </div>
+        
+        <!-- КОНТЕЙНЕР ДЛЯ ВОЛН -->
+        <div id="waveform-container" class="waveform-container">
+            <div id="waveform"></div>
+        </div>
+        
+        <div class="player-controls">
+            <button id="play-pause-btn" onclick="togglePlay()">▶</button>
+            <span id="current-time">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+        <!-- 3D КУБ (РЕАЛИСТИЧНЫЙ) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module" src="{{ url_for('static', filename='js/3d-cube.js') }}"></script>
+    <!-- БИБЛИОТЕКА ДЛЯ ВОЛНОВОЙ ВИЗУАЛИЗАЦИИ -->
+    <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.min.css">
+</body>
+</html>

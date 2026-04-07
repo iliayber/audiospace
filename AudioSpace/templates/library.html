@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Библиотека</h1>
+<div class="tracks-grid">
+    {% for track in tracks %}
+    <div class="track-card">
+        <div class="track-cover">🎵</div>
+        <div class="track-info">
+            <!-- ССЫЛКА НА ТРЕК -->
+            <a href="/track/{{ track.id }}" class="track-title">{{ track.title }}</a>
+            <div class="track-artist">{{ track.artist }}</div>
+        </div>
+        <div class="track-actions">
+            <button class="play-btn" onclick="playTrack({{ track.id }}, '{{ track.file_path }}', '{{ track.title }}', '{{ track.artist }}')">▶</button>
+            <button class="like-btn-small" onclick="likeTrack({{ track.id }}, this)">❤️</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

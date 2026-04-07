@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Профиль: {{ profile_user.username }}</h1>
+<div class="profile-info">
+    <p>📊 Треков загружено: {{ tracks|length }}</p>
+</div>
+
+<h2>🎵 Мои треки</h2>
+<div class="tracks-grid">
+    {% for track in tracks %}
+    <div class="track-card">
+        <div class="track-cover">🎵</div>
+        <div class="track-info">
+            <a href="/track/{{ track.id }}" class="track-title">{{ track.title }}</a>
+            <div class="track-artist">{{ track.artist }}</div>
+            <div class="track-stats">
+                ❤️ {{ track.likes_count }} | 👁️ {{ track.play_count }}
+            </div>
+        </div>
+        <div class="track-actions">
+            <button class="play-btn" onclick="playTrack({{ track.id }}, '{{ track.file_path }}', '{{ track.title }}', '{{ track.artist }}')">▶</button>
+            {% if current_user.id == track.user_id or current_user.username == 'admin' %}
+            <a href="/edit_track/{{ track.id }}" class="edit-btn-small">✏️</a>
+            <button onclick="deleteTrack({{ track.id }})" class="delete-btn-small">🗑️</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function deleteTrack(trackId) {
+    if (confirm('Удалить этот трек? Комментарии и лайки будут удалены!')) {
+        fetch('/delete_track/' + trackId, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка');
+            }
+        });
+    }
+}
+</script>
+
+<style>
+.track-stats {
+    font-size: 11px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.edit-btn-small, .delete-btn-small {
+    background: #333;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white;
+}
+
+.edit-btn-small:hover {
+    background: #ffaa00;
+}
+
+.delete-btn-small:hover {
+    background: #ff4444;
+}
+</style>
+{% endblock %}

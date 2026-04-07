@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="track-page">
+    <div class="track-header">
+        <div class="track-cover-large">🎵</div>
+        <div class="track-details">
+            <h1>{{ track.title }}</h1>
+            <p>Исполнитель: {{ track.artist }}</p>
+            <p>Жанр: {{ track.genre or 'Не указан' }}</p>
+            <p>👁️ Прослушиваний: {{ track.play_count }}</p>
+            <button class="like-btn" onclick="likeTrack({{ track.id }}, this)">
+                ❤️ Лайк (<span id="likes-count">{{ track.likes_count }}</span>)
+            </button>
+            
+            <!-- Кнопки редактирования и удаления (только для владельца) -->
+            {% if current_user.id == track.user_id or current_user.username == 'admin' %}
+            <div class="track-actions-admin" style="margin-top: 15px;">
+                <a href="/edit_track/{{ track.id }}" class="edit-btn">✏️ Редактировать</a>
+                <button onclick="deleteTrack({{ track.id }})" class="delete-btn">🗑️ Удалить</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="comments-section">
+        <h3>💬 Комментарии ({{ comments|length }})</h3>
+        
+        {% if current_user.is_authenticated %}
+        <div class="add-comment">
+            <form method="POST" action="/comment/{{ track.id }}" class="comment-form">
+                <textarea name="content" placeholder="Напишите комментарий..." required></textarea>
+                <button type="submit">Отправить</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="login-to-comment"><a href="/login">Войдите</a>, чтобы оставить комментарий</p>
+        {% endif %}
+        
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>{{ comment.user.username }}</strong>
+                </div>
+                <p>{{ comment.content }}</p>
+            </div>
+            {% else %}
+            <p class="no-comments">Пока нет комментариев. Будьте первым!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function likeTrack(trackId, buttonElement) {
+    fetch('/like/' + trackId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.liked) {
+            buttonElement.classList.add('liked');
+        } else {
+            buttonElement.classList.remove('liked');
+        }
+        const likesSpan = document.getElementById('likes-count');
+        if (likesSpan) {
+            likesSpan.innerText = data.likes_count;
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+}
+
+function deleteTrack(trackId) {
+    if (confirm('Вы уверены, что хотите удалить этот трек? Комментарии и лайки будут удалены навсегда!')) {
+        fetch('/delete_track/' + trackId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Трек удалён!');
+                window.location.href = '/';
+            } else {
+                alert('Ошибка при удалении');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
